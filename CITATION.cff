@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use commonly-cited in research, please cite the software."
+title: "commonly-cited"
+type: software
+authors:
+  - family-names: Ortega
+    given-names: Tomas
+repository-code: "https://github.com/TomasOrtega/get-commonly-cited"
+url: "https://github.com/TomasOrtega/get-commonly-cited"
+license: BSD-3-Clause
+version: 0.1.0
+date-released: 2026-08-07
+keywords:
+  - bibliography
+  - citation analysis
+  - scholarly metadata
+  - Crossref
+  - OpenAlex

@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose an improvement to parsing, matching, identity, output, or project tooling.
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user problem would this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the interface, expected output, and important tradeoffs.
+    validations:
+      required: true
+
+  - type: textarea
+    id: examples
+    attributes:
+      label: Examples
+      description: Include anonymized references or command examples when useful.
+
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Project constraints
+      options:
+        - label: The proposal can remain auditable.
+          required: true
+        - label: The proposal does not require storing or exposing API keys.
+          required: true
+        - label: The proposal can be tested without live network access.
+          required: true
