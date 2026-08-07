@@ -4,9 +4,12 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](LICENSE)
 
+**[Use the web app](https://tomasortega.github.io/get-commonly-cited/)** — no
+installation or API key required.
+
 `commonly-cited` finds the people who occur most often in a bibliography. It is
-built for the messy reference lists people actually paste from papers, PDFs,
-web pages, and word processors. It also resolves citations containing “et al.”
+built for the messy reference lists people actually paste from papers, PDFs, web
+pages, and word processors. It also resolves citations containing “et al.”
 against scholarly metadata so the hidden coauthors are counted.
 
 ```text
@@ -27,6 +30,14 @@ matches unresolved instead of quietly assigning the wrong paper. The optional
 audit file records every match, score, alternative candidate, recovered author,
 and provider error.
 
+The static web app is Crossref-only and runs the analysis in your browser.
+Crossref responses and their citation queries are cached in that browser, and
+reference text goes directly to Crossref rather than through a commonly-cited
+server. Public API rate limits make large bibliographies slower than local
+DOI-heavy runs. The browser matcher uses the same evidence weights and
+confidence gates as the Python package, but borderline fuzzy scores can differ
+slightly from RapidFuzz-backed CLI results.
+
 ## What it does
 
 1. Splits poorly formatted input into references. Numbered lists, wrapped lines,
@@ -46,18 +57,29 @@ same-name authors. OpenAlex requires a free API key as of February 13, 2026.
 
 ## Installation
 
-For development or before the first PyPI release:
+For a keyless browser version, open the
+[hosted web app](https://tomasortega.github.io/get-commonly-cited/). See the
+[web app documentation](https://tomasortega.github.io/get-commonly-cited/docs/web/)
+for its privacy, caching, and rate-limit behavior.
+
+Install the command-line tool from PyPI:
+
+```bash
+uv tool install commonly-cited
+```
+
+Or install it into an existing Python environment:
+
+```bash
+python -m pip install commonly-cited
+```
+
+For development from a source checkout:
 
 ```bash
 git clone https://github.com/TomasOrtega/get-commonly-cited.git
 cd get-commonly-cited
 uv tool install .
-```
-
-A regular virtual environment also works:
-
-```bash
-python -m pip install .
 ```
 
 ## Basic use
@@ -90,8 +112,8 @@ Use JSON for downstream analysis:
 commonly-cited references.txt --format json --top 0 > result.json
 ```
 
-Rank large-team papers fractionally, assigning each author `1 / number of
-counted authors` for a work:
+Rank large-team papers fractionally, assigning each author
+`1 / number of counted authors` for a work:
 
 ```bash
 commonly-cited references.txt --ranking fractional
@@ -196,6 +218,10 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy
 uv run mkdocs build --strict
+npm --prefix web ci
+npm --prefix web run lint
+npm --prefix web test
+npm --prefix web run build
 ```
 
 Or run the grouped sessions:

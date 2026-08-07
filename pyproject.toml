@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "commonly-cited"
-version = "0.1.0"
+version = "0.2.0"
 description = "Find the people cited most often in a noisy reference list, including authors hidden behind et al."
 readme = "README.md"
 license = "BSD-3-Clause"
@@ -47,8 +47,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/TomasOrtega/get-commonly-cited"
-Documentation = "https://github.com/TomasOrtega/get-commonly-cited/tree/main/docs"
+Homepage = "https://tomasortega.github.io/get-commonly-cited/"
+Documentation = "https://tomasortega.github.io/get-commonly-cited/docs/"
 Repository = "https://github.com/TomasOrtega/get-commonly-cited"
 Issues = "https://github.com/TomasOrtega/get-commonly-cited/issues"
 Changelog = "https://github.com/TomasOrtega/get-commonly-cited/blob/main/CHANGELOG.md"

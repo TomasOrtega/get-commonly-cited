@@ -7,6 +7,13 @@ updates:
     labels:
       - dependencies
 
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+
   - package-ecosystem: github-actions
     directory: /
     schedule:

@@ -42,7 +42,7 @@ class CachedHttpClient:
         timeout: float = 20.0,
         max_retries: int = 3,
         min_interval: float = 0.0,
-        user_agent: str = "commonly-cited/0.1.0",
+        user_agent: str = "commonly-cited/0.2.0",
         client: httpx.Client | None = None,
         sleep: Callable[[float], None] = time.sleep,
         monotonic: Callable[[], float] = time.monotonic,
