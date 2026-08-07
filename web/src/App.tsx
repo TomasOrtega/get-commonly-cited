@@ -257,7 +257,7 @@ function App() {
                 setResult(null);
                 setError(null);
               }}
-              placeholder="Paste references here…\n\nNumbered lists, BibTeX, RIS, DOIs, and wrapped citations are welcome."
+              placeholder="Paste references here…\\n\\nNumbered lists, BibTeX, RIS, DOIs, and wrapped citations are welcome."
               spellCheck={false}
               disabled={isAnalyzing}
               aria-describedby="input-guidance input-count"
