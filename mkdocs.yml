@@ -1,0 +1,39 @@
+site_name: commonly-cited
+site_description: Find the people cited most often in a noisy bibliography.
+repo_url: https://github.com/TomasOrtega/get-commonly-cited
+repo_name: TomasOrtega/get-commonly-cited
+edit_uri: edit/main/docs/
+strict: true
+
+theme:
+  name: material
+  features:
+    - content.code.copy
+    - navigation.sections
+    - navigation.top
+    - search.suggest
+
+nav:
+  - Home: index.md
+  - Usage: usage.md
+  - How matching works: algorithm.md
+  - Python API: reference.md
+  - Privacy: privacy.md
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: false
+            show_signature_annotations: true
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences

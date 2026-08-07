@@ -1,0 +1,37 @@
+# Byte-compiled files and caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Packaging
+dist/
+build/
+*.egg-info/
+
+# Environments
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Documentation
+site/
+docs/_build/
+
+# Editors and operating systems
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local analysis output
+audit.json
+commonly-cited.csv
+commonly-cited.json

@@ -1,0 +1,68 @@
+name: Bug report
+description: Report a parsing, matching, counting, output, or packaging problem.
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Remove private information and API keys before submitting.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: Minimal reference example
+      description: Provide the smallest anonymized reference text that reproduces the problem.
+      render: text
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      render: shell
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: commonly-cited version
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Provider mode
+      options:
+        - auto
+        - crossref
+        - openalex
+        - both
+        - offline
+    validations:
+      required: true
+
+  - type: textarea
+    id: audit
+    attributes:
+      label: Relevant audit excerpt
+      description: Remove anything sensitive. Never include OPENALEX_API_KEY.
+      render: json
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Python version, and installation method.
+    validations:
+      required: true
