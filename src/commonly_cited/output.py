@@ -20,6 +20,10 @@ OutputFormat = Literal["table", "json", "csv", "markdown"]
 RankingMode = Literal["full", "fractional"]
 
 
+def _safe_csv_text(value: str) -> str:
+    return f"'{value}" if value.startswith(("=", "+", "-", "@", "\t", "\r")) else value
+
+
 def _identifier(person: PersonCount) -> str:
     if person.orcid:
         return f"ORCID {person.orcid}"
@@ -223,7 +227,7 @@ def render_csv(
         writer.writerow(
             {
                 "rank": rank,
-                "name": person.display_name,
+                "name": _safe_csv_text(person.display_name),
                 "cited_works": person.full_count,
                 "fractional_count": f"{person.fractional_count:.6f}",
                 "share_of_matched_works": (
@@ -231,7 +235,9 @@ def render_csv(
                 ),
                 "orcid": person.orcid or "",
                 "openalex_id": person.openalex_id or "",
-                "aliases": " | ".join(sorted(person.aliases - {person.display_name})),
+                "aliases": _safe_csv_text(
+                    " | ".join(sorted(person.aliases - {person.display_name}))
+                ),
             }
         )
 

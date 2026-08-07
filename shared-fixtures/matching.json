@@ -1,0 +1,112 @@
+{
+  "cases": [
+    {
+      "name": "strong evidence is accepted",
+      "reference": {
+        "raw": "Smith, J. (2020). A useful paper. Journal of Useful Results.",
+        "doi": null,
+        "years": [2020],
+        "visible_surnames": ["smith"]
+      },
+      "works": [
+        {
+          "id": "work:useful",
+          "title": "A useful paper",
+          "year": 2020,
+          "doi": null,
+          "venue": "Journal of Useful Results",
+          "authors": [{ "display_name": "Jane Smith", "family": "Smith" }]
+        }
+      ],
+      "min_margin": 0.04,
+      "expected": {
+        "accepted": true,
+        "ambiguous": false,
+        "best_id": "work:useful"
+      }
+    },
+    {
+      "name": "poor title evidence is rejected",
+      "reference": {
+        "raw": "Smith, J. (2020). A useful paper.",
+        "doi": null,
+        "years": [2020],
+        "visible_surnames": ["smith"]
+      },
+      "works": [
+        {
+          "id": "work:ocean",
+          "title": "Completely unrelated oceanography",
+          "year": 2020,
+          "doi": null,
+          "venue": "Marine Science",
+          "authors": [{ "display_name": "Jane Smith", "family": "Smith" }]
+        }
+      ],
+      "min_margin": 0.04,
+      "expected": {
+        "accepted": false,
+        "ambiguous": false,
+        "best_id": "work:ocean"
+      }
+    },
+    {
+      "name": "near tie remains ambiguous",
+      "reference": {
+        "raw": "Smith (2020). Similar title.",
+        "doi": null,
+        "years": [2020],
+        "visible_surnames": []
+      },
+      "works": [
+        {
+          "id": "work:similar",
+          "title": "Similar title",
+          "year": 2020,
+          "doi": null,
+          "venue": "Journal",
+          "authors": [{ "display_name": "Jane Smith", "family": "Smith" }]
+        },
+        {
+          "id": "work:a-similar",
+          "title": "A similar title",
+          "year": 2020,
+          "doi": null,
+          "venue": "Journal",
+          "authors": [{ "display_name": "Jane Smith", "family": "Smith" }]
+        }
+      ],
+      "min_margin": 0.2,
+      "expected": {
+        "accepted": false,
+        "ambiguous": true,
+        "best_id": "work:similar"
+      }
+    },
+    {
+      "name": "exact DOI overrides noisy text",
+      "reference": {
+        "raw": "Unrelated text",
+        "doi": "10.1000/example",
+        "years": [],
+        "visible_surnames": []
+      },
+      "works": [
+        {
+          "id": "work:doi",
+          "title": "Different title",
+          "year": 2018,
+          "doi": "10.1000/EXAMPLE",
+          "venue": null,
+          "authors": [{ "display_name": "Alex Doe", "family": "Doe" }]
+        }
+      ],
+      "min_margin": 0.04,
+      "expected": {
+        "accepted": true,
+        "ambiguous": false,
+        "best_id": "work:doi"
+      }
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "cases": [
+    {
+      "name": "numbered multiline references",
+      "input": "References\n[1] Smith, J., Doe, A., et al. (2020). A useful paper.\n    Journal of Useful Results 4, 10-20.\n[2] J. Smith and B. Roe. 2021. Another result.\n    doi:10.1234/ABC.7",
+      "expected": [
+        {
+          "raw": "Smith, J., Doe, A., et al. (2020). A useful paper. Journal of Useful Results 4, 10-20.",
+          "doi": null,
+          "years": [2020],
+          "has_et_al": true
+        },
+        {
+          "raw": "J. Smith and B. Roe. 2021. Another result. doi:10.1234/ABC.7",
+          "doi": "10.1234/abc.7",
+          "years": [2021],
+          "has_et_al": false
+        }
+      ]
+    },
+    {
+      "name": "inline numbered references",
+      "input": "[1] Smith J. 2020. First title. [2] Doe A. 2021. Second title.",
+      "expected": [
+        {
+          "raw": "Smith J. 2020. First title.",
+          "doi": null,
+          "years": [2020],
+          "has_et_al": false
+        },
+        {
+          "raw": "Doe A. 2021. Second title.",
+          "doi": null,
+          "years": [2021],
+          "has_et_al": false
+        }
+      ]
+    },
+    {
+      "name": "plain numbering after a page range",
+      "input": "1. Smith, J. (2020). First title. Journal 5, 1–2. 2. Doe, A. (2021). Second title. Journal 6, 3–4.",
+      "expected": [
+        {
+          "raw": "Smith, J. (2020). First title. Journal 5, 1–2.",
+          "doi": null,
+          "years": [2020],
+          "has_et_al": false
+        },
+        {
+          "raw": "Doe, A. (2021). Second title. Journal 6, 3–4.",
+          "doi": null,
+          "years": [2021],
+          "has_et_al": false
+        }
+      ]
+    },
+    {
+      "name": "BibTeX entries",
+      "input": "@article{one,\n  author = {Smith, Jane},\n  title = {First title},\n  year = {2020}\n}\n@article{two,\n  author = {Doe, Alex},\n  title = {Second title},\n  year = {2021}\n}",
+      "expected": [
+        {
+          "raw": "@article{one, author = {Smith, Jane}, title = {First title}, year = {2020} }",
+          "doi": null,
+          "years": [2020],
+          "has_et_al": false
+        },
+        {
+          "raw": "@article{two, author = {Doe, Alex}, title = {Second title}, year = {2021} }",
+          "doi": null,
+          "years": [2021],
+          "has_et_al": false
+        }
+      ]
+    },
+    {
+      "name": "RIS entries",
+      "input": "TY  - JOUR\nAU  - Smith, Jane\nPY  - 2020\nTI  - First title\nER  -\nTY  - JOUR\nAU  - Doe, Alex\nPY  - 2021\nTI  - Second title\nER  -",
+      "expected": [
+        {
+          "raw": "TY - JOUR AU - Smith, Jane PY - 2020 TI - First title ER -",
+          "doi": null,
+          "years": [2020],
+          "has_et_al": false
+        },
+        {
+          "raw": "TY - JOUR AU - Doe, Alex PY - 2021 TI - Second title ER -",
+          "doi": null,
+          "years": [2021],
+          "has_et_al": false
+        }
+      ]
+    },
+    {
+      "name": "PDF line-wrap repair",
+      "input": "Smith, J. (2020). A use-\nful result in practice. Journal 4, 10-20.",
+      "expected": [
+        {
+          "raw": "Smith, J. (2020). A useful result in practice. Journal 4, 10-20.",
+          "doi": null,
+          "years": [2020],
+          "has_et_al": false
+        }
+      ]
+    }
+  ]
+}

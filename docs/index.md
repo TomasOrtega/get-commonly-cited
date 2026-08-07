@@ -3,6 +3,12 @@
 `commonly-cited` identifies the people who appear most often across a pasted
 bibliography, including coauthors hidden behind “et al.”.
 
+**[Open the web app](https://tomasortega.github.io/get-commonly-cited/)**
+
+The keyless web app runs locally in your browser and resolves references with
+Crossref. The Python package adds command-line automation and optional OpenAlex
+author-identity enrichment.
+
 The tool combines four concerns that are usually handled separately:
 
 - tolerant segmentation of copied reference lists
@@ -16,9 +22,9 @@ The tool combines four concerns that are usually handled separately:
 commonly-cited references.txt --audit audit.json
 ```
 
-Crossref is enabled by default and requires no account. Set
-`OPENALEX_API_KEY` to enrich matched works with OpenAlex's disambiguated author
-identities.
+Crossref is enabled by default and requires no account. Set `OPENALEX_API_KEY`
+to enrich matched works with OpenAlex's disambiguated author identities.
 
-Read [Usage](usage.md) for all commands, [How matching works](algorithm.md) for
-scoring details, and [Python API](reference.md) for library use.
+Read [Web app](web.md) for browser-specific behavior, [Usage](usage.md) for all
+commands, [How matching works](algorithm.md) for scoring details, and
+[Python API](reference.md) for library use.

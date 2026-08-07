@@ -23,6 +23,7 @@ _INLINE_NUMBER_RE = re.compile(
     r"(?<!\w)(?:\[(?P<bracket>\d{1,3})\]|\((?P<paren>\d{1,3})\)|"
     r"(?P<plain>\d{1,3})[.)])\s+"
 )
+_DASH_CHARACTERS = "-\u2010\u2011\u2012\u2013\u2014\u2015"
 _BIBTEX_START_RE = re.compile(
     r"^\s*@(?:article|book|inproceedings|misc|phdthesis|"
     r"mastersthesis|techreport|incollection|proceedings)\s*\{",
@@ -142,7 +143,14 @@ def _split_ris(text: str) -> list[str]:
 
 
 def _split_inline_numbered(text: str) -> list[str]:
-    matches = list(_INLINE_NUMBER_RE.finditer(text))
+    matches = [
+        match
+        for match in _INLINE_NUMBER_RE.finditer(text)
+        if not (
+            match.group("plain")
+            and text[: match.start()].rstrip().endswith(tuple(_DASH_CHARACTERS))
+        )
+    ]
     if len(matches) < 2:
         return []
     # Inline markers are only credible when the first one starts the list. This
@@ -151,6 +159,20 @@ def _split_inline_numbered(text: str) -> list[str]:
     prefix = text[: matches[0].start()].strip()
     if prefix and not _HEADING_RE.match(prefix):
         return []
+
+    first = matches[0]
+    style = next(name for name in ("bracket", "paren", "plain") if first.group(name))
+    expected_number = int(first.group(style)) + 1
+    sequence = [first]
+    for match in matches[1:]:
+        value = match.group(style)
+        if value is not None and int(value) == expected_number:
+            sequence.append(match)
+            expected_number += 1
+    matches = sequence
+    if len(matches) < 2:
+        return []
+
     entries: list[str] = []
     for index, match in enumerate(matches):
         start = match.end()
