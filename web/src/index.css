@@ -1223,19 +1223,12 @@ details[open] .disclosure {
 
 .privacy-note {
   display: grid;
-  grid-template-columns: 0.2fr 0.8fr 1fr;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(550px, 1.2fr);
   gap: clamp(30px, 5vw, 72px);
   align-items: start;
   padding: clamp(60px, 7vw, 96px) clamp(20px, 6vw, 96px);
   border-top: 1px solid var(--line-dark);
   background: var(--sage);
-}
-
-.privacy-index {
-  color: var(--accent-dark);
-  font-family: var(--serif);
-  font-size: 17px;
-  font-style: italic;
 }
 
 .privacy-copy {
@@ -1340,11 +1333,7 @@ footer p span {
   }
 
   .privacy-note {
-    grid-template-columns: 0.12fr 0.88fr;
-  }
-
-  .privacy-copy {
-    grid-column: 2;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1501,18 +1490,6 @@ footer p span {
   }
 
   .audit-detail .alternatives {
-    grid-column: 1;
-  }
-
-  .privacy-note {
-    grid-template-columns: 1fr;
-  }
-
-  .privacy-index {
-    display: none;
-  }
-
-  .privacy-copy {
     grid-column: 1;
   }
 }

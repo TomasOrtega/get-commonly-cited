@@ -13,4 +13,13 @@ describe("App", () => {
     );
     expect(markup).not.toContain("\\\\n");
   });
+
+  it("uses the section label pattern for privacy", () => {
+    const markup = renderToStaticMarkup(createElement(App));
+
+    expect(markup).toContain(
+      '<p class="eyebrow"><span>03</span> Privacy &amp; limits</p>',
+    );
+    expect(markup).not.toContain('class="privacy-index"');
+  });
 });

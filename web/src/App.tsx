@@ -396,9 +396,8 @@ function App() {
         )}
 
         <section className="privacy-note" aria-labelledby="privacy-title">
-          <div className="privacy-index" aria-hidden="true">03</div>
           <div>
-            <p className="eyebrow">Privacy &amp; limits</p>
+            <p className="eyebrow"><span>03</span> Privacy &amp; limits</p>
             <h2 id="privacy-title">Runs here. Resolves there.</h2>
           </div>
           <div className="privacy-copy">
