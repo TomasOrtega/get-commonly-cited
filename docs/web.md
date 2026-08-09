@@ -1,7 +1,7 @@
 # Web app
 
-The [commonly-cited web app](https://tomasortega.github.io/get-commonly-cited/)
-runs entirely in the browser. Paste a bibliography, resolve its references, and
+The [commonly-cited web app](https://commonly-cited.tomasortega.net/) runs
+entirely in the browser. Paste a bibliography, resolve its references, and
 download the ranking without installing Python or creating an API key.
 
 ## How it differs from the CLI

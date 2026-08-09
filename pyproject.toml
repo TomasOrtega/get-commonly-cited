@@ -47,8 +47,8 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://tomasortega.github.io/get-commonly-cited/"
-Documentation = "https://tomasortega.github.io/get-commonly-cited/docs/"
+Homepage = "https://commonly-cited.tomasortega.net/"
+Documentation = "https://commonly-cited.tomasortega.net/docs/"
 Repository = "https://github.com/TomasOrtega/get-commonly-cited"
 Issues = "https://github.com/TomasOrtega/get-commonly-cited/issues"
 Changelog = "https://github.com/TomasOrtega/get-commonly-cited/blob/main/CHANGELOG.md"

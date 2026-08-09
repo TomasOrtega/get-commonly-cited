@@ -1,6 +1,6 @@
 site_name: commonly-cited
 site_description: Find the people cited most often in a noisy bibliography.
-site_url: https://tomasortega.github.io/get-commonly-cited/docs/
+site_url: https://commonly-cited.tomasortega.net/docs/
 repo_url: https://github.com/TomasOrtega/get-commonly-cited
 repo_name: TomasOrtega/get-commonly-cited
 edit_uri: edit/main/docs/

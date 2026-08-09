@@ -3,7 +3,7 @@
 `commonly-cited` identifies the people who appear most often across a pasted
 bibliography, including coauthors hidden behind “et al.”.
 
-**[Open the web app](https://tomasortega.github.io/get-commonly-cited/)**
+**[Open the web app](https://commonly-cited.tomasortega.net/)**
 
 The keyless web app runs locally in your browser and resolves references with
 Crossref. The Python package adds command-line automation and optional OpenAlex

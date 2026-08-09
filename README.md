@@ -4,8 +4,8 @@
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![BSD-3-Clause](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](LICENSE)
 
-**[Use the web app](https://tomasortega.github.io/get-commonly-cited/)** — no
-installation or API key required.
+**[Use the web app](https://commonly-cited.tomasortega.net/)** — no installation
+or API key required.
 
 `commonly-cited` finds the people who occur most often in a bibliography. It is
 built for the messy reference lists people actually paste from papers, PDFs, web
@@ -58,9 +58,9 @@ same-name authors. OpenAlex requires a free API key as of February 13, 2026.
 ## Installation
 
 For a keyless browser version, open the
-[hosted web app](https://tomasortega.github.io/get-commonly-cited/). See the
-[web app documentation](https://tomasortega.github.io/get-commonly-cited/docs/web/)
-for its privacy, caching, and rate-limit behavior.
+[hosted web app](https://commonly-cited.tomasortega.net/). See the
+[web app documentation](https://commonly-cited.tomasortega.net/docs/web/) for
+its privacy, caching, and rate-limit behavior.
 
 Install the command-line tool from PyPI:
 
