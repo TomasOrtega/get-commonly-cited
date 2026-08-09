@@ -11,6 +11,7 @@ import {
 
 const MAX_REFERENCES = 100;
 const GITHUB_URL = "https://github.com/TomasOrtega/get-commonly-cited";
+const SPONSORS_URL = "https://github.com/sponsors/TomasOrtega";
 const DOCS_URL = "./docs/";
 const ACCEPTED_EXTENSIONS = ["txt", "bib", "ris"];
 
@@ -428,7 +429,10 @@ function App() {
 
       <footer>
         <p>Commonly Cited <span>·</span> An open-source research utility</p>
-        <a href={GITHUB_URL}>BSD-3-Clause <span aria-hidden="true">↗</span></a>
+        <nav aria-label="Footer navigation">
+          <a href={SPONSORS_URL}>Sponsor the developer <span aria-hidden="true">↗</span></a>
+          <a href={GITHUB_URL}>BSD-3-Clause <span aria-hidden="true">↗</span></a>
+        </nav>
       </footer>
     </>
   );

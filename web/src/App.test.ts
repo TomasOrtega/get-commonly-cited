@@ -22,4 +22,12 @@ describe("App", () => {
     );
     expect(markup).not.toContain('class="privacy-index"');
   });
+
+  it("links to the developer's GitHub Sponsors page", () => {
+    const markup = renderToStaticMarkup(createElement(App));
+
+    expect(markup).toContain(
+      '<a href="https://github.com/sponsors/TomasOrtega">Sponsor the developer',
+    );
+  });
 });
