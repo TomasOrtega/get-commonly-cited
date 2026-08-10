@@ -8,6 +8,11 @@ and this project follows
 
 ## [Unreleased]
 
+### Added
+
+- analyze a paper's deposited bibliography from a DOI-bearing link in the web
+  app
+
 ## [0.2.0] - 2026-08-07
 
 ### Added

@@ -3,10 +3,16 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import {
   aggregateResolutions,
   analyzeBibliography,
+  analyzeReferences,
   clearCrossrefCache,
+  isPaperBibliographyOverLimit,
+  loadPaperBibliography,
+  PaperLinkError,
+  parseReference,
   parseReferences,
   resultToCsv,
   resultToJson,
+  type PaperBibliography,
 } from "./lib";
 
 const MAX_REFERENCES = 100;
@@ -22,12 +28,14 @@ Kahneman, D., & Tversky, A. (1979). Prospect theory: An analysis of decision und
 Tversky, A., & Kahneman, D. (1981). The framing of decisions and the psychology of choice. Science, 211(4481), 453–458. https://doi.org/10.1126/science.7455683`;
 
 type RankingMode = "full" | "fractional";
+type SourceMode = "paper" | "references";
 type AnalysisData = Awaited<ReturnType<typeof analyzeBibliography>>;
 type Resolution = AnalysisData["resolutions"][number];
 type Progress = {
-  current: number;
-  total: number;
+  current: number | null;
+  total: number | null;
   reference: { raw: string };
+  label: string;
 };
 
 function downloadBlob(contents: string, filename: string, type: string): void {
@@ -62,7 +70,11 @@ function formatStatus(status: Resolution["status"]): string {
 }
 
 function App() {
+  const [sourceMode, setSourceMode] = useState<SourceMode>("references");
   const [input, setInput] = useState("");
+  const [paperLink, setPaperLink] = useState("");
+  const [paperLinkInvalid, setPaperLinkInvalid] = useState(false);
+  const [paperBibliography, setPaperBibliography] = useState<PaperBibliography | null>(null);
   const [filename, setFilename] = useState<string | null>(null);
   const [ranking, setRanking] = useState<RankingMode>("full");
   const [includeCollective, setIncludeCollective] = useState(false);
@@ -84,7 +96,11 @@ function App() {
       return 0;
     }
   }, [input]);
-  const isOverLimit = referenceCount > MAX_REFERENCES;
+  const paperReferenceCount = paperBibliography?.references.length ?? 0;
+  const isOverLimit = sourceMode === "paper"
+    ? paperBibliography !== null && isPaperBibliographyOverLimit(paperBibliography, MAX_REFERENCES)
+    : referenceCount > MAX_REFERENCES;
+  const hasSourceInput = sourceMode === "paper" ? Boolean(paperLink.trim()) : Boolean(input.trim());
   const displayedResult = useMemo(
     () => result
       ? aggregateResolutions(result.resolutions, {
@@ -137,9 +153,20 @@ function App() {
     setError(null);
   }
 
+  function changeSourceMode(mode: SourceMode): void {
+    setSourceMode(mode);
+    setResult(null);
+    setError(null);
+    setPaperLinkInvalid(false);
+  }
+
   function reset(): void {
     abortControllerRef.current?.abort();
+    setSourceMode("references");
     setInput("");
+    setPaperLink("");
+    setPaperLinkInvalid(false);
+    setPaperBibliography(null);
     setFilename(null);
     setResult(null);
     setProgress(null);
@@ -149,32 +176,74 @@ function App() {
   }
 
   async function runAnalysis(): Promise<void> {
-    if (!input.trim()) {
-      setError("Paste a reference list or choose a file first.");
+    if (!hasSourceInput) {
+      setError(
+        sourceMode === "paper"
+          ? "Enter a paper link first."
+          : "Paste a reference list or choose a file first.",
+      );
       return;
     }
     if (isOverLimit) {
-      setError(`This browser version accepts up to ${MAX_REFERENCES} references at a time.`);
+      setError(
+        sourceMode === "paper"
+          ? `Crossref returned ${paperReferenceCount} usable references; the browser limit is ${MAX_REFERENCES}.`
+          : `This browser version accepts up to ${MAX_REFERENCES} references at a time.`,
+      );
       return;
     }
 
     setError(null);
+    setPaperLinkInvalid(false);
     setResult(null);
     setIsAnalyzing(true);
     const controller = new AbortController();
     abortControllerRef.current = controller;
-    setProgress({ current: 0, total: referenceCount, reference: { raw: "Preparing references" } });
     try {
-      const nextResult = await analyzeBibliography(
-        input,
-        {
-          ranking,
-          top: 0,
-          includeCollective,
+      let paperReferences: ReturnType<typeof parseReference>[] | null = null;
+      let analysisReferenceCount = referenceCount;
+      if (sourceMode === "paper") {
+        setPaperBibliography(null);
+        setProgress({
+          current: null,
+          total: null,
+          reference: { raw: paperLink },
+          label: "Loading paper references",
+        });
+        const bibliography = await loadPaperBibliography(paperLink, {
           signal: controller.signal,
-        },
-        (event) => setProgress(event),
-      );
+        });
+        setPaperBibliography(bibliography);
+        analysisReferenceCount = bibliography.references.length;
+        if (isPaperBibliographyOverLimit(bibliography, MAX_REFERENCES)) {
+          setError(
+            `Crossref returned ${analysisReferenceCount} usable references; the browser limit is ${MAX_REFERENCES}.`,
+          );
+          return;
+        }
+        paperReferences = bibliography.references.map(
+          (reference, index) => parseReference(reference, index + 1),
+        );
+      }
+
+      setProgress({
+        current: 0,
+        total: analysisReferenceCount,
+        reference: { raw: "Preparing references" },
+        label: "Checking Crossref",
+      });
+      const options = {
+        ranking,
+        top: 0,
+        includeCollective,
+        signal: controller.signal,
+      };
+      const onProgress = (event: Omit<Progress, "label">) => {
+        setProgress({ ...event, label: "Checking Crossref" });
+      };
+      const nextResult = paperReferences
+        ? await analyzeReferences(paperReferences, options, onProgress)
+        : await analyzeBibliography(input, options, onProgress);
       if (nextResult.summary.inputReferences > MAX_REFERENCES) {
         setError(`This list contains ${nextResult.summary.inputReferences} references; the limit is ${MAX_REFERENCES}.`);
         return;
@@ -182,8 +251,11 @@ function App() {
       setResult(nextResult);
     } catch (caught) {
       if (caught instanceof Error && caught.name === "AbortError") {
-        setError("Analysis stopped. Your bibliography is still here when you are ready.");
+        setError("Analysis stopped. Your source input is still here when you are ready.");
         return;
+      }
+      if (caught instanceof PaperLinkError && caught.code === "invalid_link") {
+        setPaperLinkInvalid(true);
       }
       const message = caught instanceof Error ? caught.message : "The analysis could not be completed.";
       setError(message);
@@ -194,7 +266,7 @@ function App() {
     }
   }
 
-  const progressPercent = progress?.total
+  const progressPercent = progress && progress.current !== null && progress.total
     ? Math.min(100, Math.round((progress.current / progress.total) * 100))
     : 0;
 
@@ -225,8 +297,8 @@ function App() {
             <p className="eyebrow"><span>01</span> Open research utility</p>
             <h1 id="hero-title">Who keeps showing up in your bibliography?</h1>
             <p className="lede">
-              Turn a reference list into a ranked view of the people behind it—including
-              coauthors tucked away behind <em>et al.</em>
+              Start with a paper link or reference list, then rank the people behind
+              the cited works—including coauthors tucked away behind <em>et al.</em>
             </p>
             <div className="method-note">
               <span className="method-rule" aria-hidden="true" />
@@ -237,60 +309,141 @@ function App() {
             </div>
           </div>
 
-          <div className="workspace" id="analysis-workspace" tabIndex={-1}>
+          <form
+            className="workspace"
+            id="analysis-workspace"
+            tabIndex={-1}
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              void runAnalysis();
+            }}
+          >
             <div className="workspace-heading">
               <div>
                 <p className="step-label">Your source material</p>
-                <h2>Paste a reference list</h2>
+                <h2>{sourceMode === "paper" ? "Link to a paper" : "Paste a reference list"}</h2>
               </div>
-              <button className="text-button" type="button" onClick={loadExample} disabled={isAnalyzing}>
-                Use an example
-              </button>
+              {sourceMode === "references" && (
+                <button className="text-button" type="button" onClick={loadExample} disabled={isAnalyzing}>
+                  Use an example
+                </button>
+              )}
             </div>
 
-            <label className="sr-only" htmlFor="bibliography-input">Bibliography text</label>
-            <textarea
-              id="bibliography-input"
-              value={input}
-              onChange={(event) => {
-                setInput(event.target.value);
-                setFilename(null);
-                setResult(null);
-                setError(null);
-              }}
-              placeholder={"Paste references here…\n\nNumbered lists, BibTeX, RIS, DOIs, and wrapped citations are welcome."}
-              spellCheck={false}
-              disabled={isAnalyzing}
-              aria-describedby="input-guidance input-count"
-              aria-invalid={isOverLimit}
-            />
-
-            <div className="input-meta">
-              <div className="file-control">
-                <input
-                  ref={fileInputRef}
-                  id="bibliography-file"
-                  type="file"
-                  accept=".txt,.bib,.ris,text/plain,application/x-bibtex,application/x-research-info-systems"
-                  onChange={(event) => {
-                    const file = event.target.files?.[0];
-                    if (file) {
-                      void handleFile(file);
-                      event.currentTarget.value = "";
-                    }
-                  }}
-                  disabled={isAnalyzing}
-                />
-                <label htmlFor="bibliography-file">
-                  <span aria-hidden="true">+</span> {filename ?? "Choose a file"}
+            <fieldset className="source-selector">
+              <legend>Start with</legend>
+              <div className="segmented-control">
+                <label>
+                  <input
+                    type="radio"
+                    name="source-mode"
+                    value="paper"
+                    checked={sourceMode === "paper"}
+                    onChange={() => changeSourceMode("paper")}
+                    disabled={isAnalyzing}
+                  />
+                  <span>Paper link</span>
                 </label>
-                <span id="input-guidance">TXT, BIB, or RIS · 1 MB max</span>
+                <label>
+                  <input
+                    type="radio"
+                    name="source-mode"
+                    value="references"
+                    checked={sourceMode === "references"}
+                    onChange={() => changeSourceMode("references")}
+                    disabled={isAnalyzing}
+                  />
+                  <span>Reference list</span>
+                </label>
               </div>
-              <p id="input-count" className={isOverLimit ? "count count-error" : "count"}>
-                <strong>{referenceCount}</strong> parsed {referenceCount === 1 ? "reference" : "references"}
-                <span aria-hidden="true"> / </span>{MAX_REFERENCES} max
-              </p>
-            </div>
+            </fieldset>
+
+            {sourceMode === "paper" ? (
+              <div className="paper-link-panel">
+                <label htmlFor="paper-link">Paper link</label>
+                <input
+                  id="paper-link"
+                  type="url"
+                  inputMode="url"
+                  autoComplete="url"
+                  value={paperLink}
+                  onChange={(event) => {
+                    setPaperLink(event.target.value);
+                    setPaperBibliography(null);
+                    setResult(null);
+                    setError(null);
+                    setPaperLinkInvalid(false);
+                  }}
+                  placeholder="https://doi.org/10.1000/example"
+                  disabled={isAnalyzing}
+                  aria-describedby="paper-link-guidance"
+                  aria-invalid={paperLinkInvalid}
+                  aria-errormessage={paperLinkInvalid ? "analysis-error" : undefined}
+                />
+                <p id="paper-link-guidance">
+                  Use a doi.org link or a publisher URL containing the DOI. References
+                  must be deposited with Crossref; 100 usable references max.
+                </p>
+                {paperBibliography && (
+                  <p className="paper-source-note" role="status">
+                    <strong>{paperBibliography.title}</strong>
+                    <span>
+                      {paperBibliography.references.length} usable {paperBibliography.references.length === 1 ? "reference" : "references"} loaded
+                      {paperBibliography.skippedReferences > 0
+                        ? ` · ${paperBibliography.skippedReferences} incomplete ${paperBibliography.skippedReferences === 1 ? "record" : "records"} skipped`
+                        : ""}
+                    </span>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <>
+                <label className="sr-only" htmlFor="bibliography-input">Bibliography text</label>
+                <textarea
+                  id="bibliography-input"
+                  value={input}
+                  onChange={(event) => {
+                    setInput(event.target.value);
+                    setFilename(null);
+                    setResult(null);
+                    setError(null);
+                  }}
+                  placeholder={"Paste references here…\n\nNumbered lists, BibTeX, RIS, DOIs, and wrapped citations are welcome."}
+                  spellCheck={false}
+                  disabled={isAnalyzing}
+                  aria-describedby="input-guidance input-count"
+                  aria-invalid={isOverLimit}
+                />
+
+                <div className="input-meta">
+                  <div className="file-control">
+                    <input
+                      ref={fileInputRef}
+                      id="bibliography-file"
+                      type="file"
+                      accept=".txt,.bib,.ris,text/plain,application/x-bibtex,application/x-research-info-systems"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) {
+                          void handleFile(file);
+                          event.currentTarget.value = "";
+                        }
+                      }}
+                      disabled={isAnalyzing}
+                    />
+                    <label htmlFor="bibliography-file">
+                      <span aria-hidden="true">+</span> {filename ?? "Choose a file"}
+                    </label>
+                    <span id="input-guidance">TXT, BIB, or RIS · 1 MB max</span>
+                  </div>
+                  <p id="input-count" className={isOverLimit ? "count count-error" : "count"}>
+                    <strong>{referenceCount}</strong> parsed {referenceCount === 1 ? "reference" : "references"}
+                    <span aria-hidden="true"> / </span>{MAX_REFERENCES} max
+                  </p>
+                </div>
+              </>
+            )}
 
             <div className="controls">
               <fieldset>
@@ -336,22 +489,28 @@ function App() {
               </label>
             </div>
 
-            {error && <div className="error-message" role="alert"><span aria-hidden="true">!</span>{error}</div>}
+            {error && <div id="analysis-error" className="error-message" role="alert"><span aria-hidden="true">!</span>{error}</div>}
 
             {isAnalyzing && progress ? (
               <div className="progress-panel" aria-live="polite" aria-atomic="true">
                 <div className="progress-copy">
-                  <span>Checking Crossref</span>
-                  <strong>{progress.current} of {progress.total}</strong>
+                  <span>{progress.label}</span>
+                  {progress.current !== null && progress.total !== null && (
+                    <strong>{progress.current} of {progress.total}</strong>
+                  )}
                 </div>
                 <div
                   className="progress-track"
                   role="progressbar"
-                  aria-valuemin={0}
-                  aria-valuemax={progress.total}
-                  aria-valuenow={progress.current}
+                  aria-label={progress.label}
+                  aria-valuemin={progress.total === null ? undefined : 0}
+                  aria-valuemax={progress.total ?? undefined}
+                  aria-valuenow={progress.current ?? undefined}
                 >
-                  <span style={{ width: `${progressPercent}%` }} />
+                  <span
+                    className={progress.total === null ? "progress-indeterminate" : undefined}
+                    style={progress.total === null ? undefined : { width: `${progressPercent}%` }}
+                  />
                 </div>
                 <p>{progress.reference.raw}</p>
                 <button ref={stopButtonRef} className="stop-button" type="button" onClick={() => abortControllerRef.current?.abort()}>
@@ -362,16 +521,15 @@ function App() {
               <div className="analyze-row">
                 <button
                   className="primary-button"
-                  type="button"
-                  onClick={() => void runAnalysis()}
-                  disabled={!input.trim() || isOverLimit}
+                  type="submit"
+                  disabled={!hasSourceInput || isOverLimit}
                 >
-                  Analyze bibliography <span aria-hidden="true">→</span>
+                  {sourceMode === "paper" ? "Analyze paper" : "Analyze bibliography"} <span aria-hidden="true">→</span>
                 </button>
                 <p>No account or API key required.</p>
               </div>
             )}
-          </div>
+          </form>
         </section>
 
         <section className="how-it-works" aria-labelledby="method-title">
@@ -380,7 +538,7 @@ function App() {
             <h2 id="method-title">From citation strings to recurring names.</h2>
           </div>
           <ol>
-            <li><span>1</span><p><strong>Parse</strong> messy references into distinct records.</p></li>
+            <li><span>1</span><p><strong>Collect</strong> references from your list or a paper’s Crossref record.</p></li>
             <li><span>2</span><p><strong>Resolve</strong> works against open Crossref metadata.</p></li>
             <li><span>3</span><p><strong>Count</strong> each person once per matched work.</p></li>
           </ol>
@@ -403,9 +561,10 @@ function App() {
           </div>
           <div className="privacy-copy">
             <p>
-              Your list is processed in this browser. Individual citations are sent directly
-              to Crossref for metadata matching. Responses and their citation queries are cached
-              on this device for seven days; this site has no server and stores no result rankings.
+              Your link or list is processed in this browser. A paper DOI and individual citations
+              are sent directly to Crossref for bibliography retrieval and metadata matching.
+              Responses and citation queries are cached on this device for seven days; this site
+              has no server and stores no result rankings.
             </p>
             <p>
               Crossref quality depends on publisher deposits. Review unresolved and ambiguous

@@ -2,12 +2,12 @@
 
 ## Web app
 
-The web app is a static application hosted on GitHub Pages. Bibliographic
-matching runs in the browser, which sends citation text directly to Crossref.
-There is no commonly-cited application server. Rankings stay in the browser.
-Successful Crossref responses and their citation queries are cached for seven
-days in the browser's local site data. Crossref and GitHub apply their own
-privacy policies to requests they receive.
+The web app is a static application hosted on GitHub Pages. Bibliography
+retrieval and matching run in the browser, which sends source-paper DOIs and
+citation text directly to Crossref. There is no commonly-cited application
+server. Rankings stay in the browser. Successful Crossref responses and their
+citation queries are cached for seven days in the browser's local site data.
+Crossref and GitHub apply their own privacy policies to requests they receive.
 
 Clear cached responses from the app or with the browser's site-data controls. Do
 not submit confidential references unless sending their citation text to

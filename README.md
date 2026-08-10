@@ -7,10 +7,11 @@
 **[Use the web app](https://commonly-cited.tomasortega.net/)** — no installation
 or API key required.
 
-`commonly-cited` finds the people who occur most often in a bibliography. It is
-built for the messy reference lists people actually paste from papers, PDFs, web
-pages, and word processors. It also resolves citations containing “et al.”
-against scholarly metadata so the hidden coauthors are counted.
+`commonly-cited` finds the people who occur most often in a bibliography. The
+web app can start from a DOI-bearing paper link or a reference list, and the CLI
+is built for the messy lists people copy from papers, PDFs, web pages, and word
+processors. Both resolve citations containing “et al.” against scholarly
+metadata so the hidden coauthors are counted.
 
 ```text
 $ commonly-cited references.txt --audit audit.json
@@ -30,13 +31,15 @@ matches unresolved instead of quietly assigning the wrong paper. The optional
 audit file records every match, score, alternative candidate, recovered author,
 and provider error.
 
-The static web app is Crossref-only and runs the analysis in your browser.
-Crossref responses and their citation queries are cached in that browser, and
-reference text goes directly to Crossref rather than through a commonly-cited
-server. Public API rate limits make large bibliographies slower than local
-DOI-heavy runs. The browser matcher uses the same evidence weights and
-confidence gates as the Python package, but borderline fuzzy scores can differ
-slightly from RapidFuzz-backed CLI results.
+The static web app is Crossref-only and runs the analysis in your browser. It
+can retrieve the deposited bibliography for a DOI-bearing paper link; publisher
+deposits do not always include references, so pasted lists remain the fallback.
+Crossref responses and citation queries are cached in that browser, and paper
+DOIs and reference text go directly to Crossref rather than through a
+commonly-cited server. Public API rate limits make large bibliographies slower
+than local DOI-heavy runs. The browser matcher uses the same evidence weights
+and confidence gates as the Python package, but borderline fuzzy scores can
+differ slightly from RapidFuzz-backed CLI results.
 
 ## What it does
 

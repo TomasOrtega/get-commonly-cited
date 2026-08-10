@@ -327,6 +327,27 @@ footer a:hover span {
   color: var(--accent);
 }
 
+.source-selector {
+  min-width: 0;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+
+.source-selector legend,
+.paper-link-panel > label {
+  margin-bottom: 9px;
+  color: var(--ink-soft);
+  font-size: var(--text-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.source-selector .segmented-control {
+  max-width: 360px;
+}
+
 .workspace textarea {
   display: block;
   width: 100%;
@@ -356,6 +377,71 @@ footer a:hover span {
 
 .workspace textarea[aria-invalid="true"] {
   border-color: var(--accent-dark);
+}
+
+.paper-link-panel > label {
+  display: block;
+}
+
+.paper-link-panel > input {
+  display: block;
+  width: 100%;
+  min-height: 57px;
+  padding: 0 18px;
+  border: 1px solid var(--line-dark);
+  border-radius: 0;
+  outline: none;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--serif);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.paper-link-panel > input::placeholder {
+  color: #686c64;
+  opacity: 1;
+}
+
+.paper-link-panel > input:focus {
+  border-color: var(--ink);
+  box-shadow: inset 4px 0 0 var(--accent);
+}
+
+.paper-link-panel > input[aria-invalid="true"] {
+  border-color: var(--accent-dark);
+}
+
+#paper-link-guidance {
+  margin: 9px 0 0;
+  color: #686c64;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.paper-source-note {
+  display: flex;
+  gap: 4px;
+  flex-direction: column;
+  margin: 16px 0 0;
+  padding: 13px 15px;
+  border-left: 3px solid var(--sage);
+  background: #eef0e8;
+  font-family: var(--serif);
+  line-height: 1.4;
+}
+
+.paper-source-note strong {
+  font-weight: 600;
+}
+
+.paper-source-note span {
+  color: var(--ink-soft);
+  font-family: "DM Sans Variable", "Helvetica Neue", sans-serif;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .input-meta {
@@ -684,6 +770,21 @@ footer a:hover span {
   height: 100%;
   background: var(--accent);
   transition: width 220ms ease;
+}
+
+.progress-track .progress-indeterminate {
+  width: 35%;
+  animation: progress-sweep 1.1s ease-in-out infinite;
+}
+
+@keyframes progress-sweep {
+  from {
+    transform: translateX(-110%);
+  }
+
+  to {
+    transform: translateX(300%);
+  }
 }
 
 .progress-panel > p {
@@ -1580,5 +1681,11 @@ footer p span {
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .progress-track .progress-indeterminate {
+    width: 100%;
+    animation: none;
+    opacity: 0.55;
   }
 }

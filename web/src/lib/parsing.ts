@@ -266,15 +266,20 @@ export function splitReferences(input: string): string[] {
     : [cleanReference(textWithoutHeading)];
 }
 
-export function parseReferences(text: string): Reference[] {
-  return splitReferences(text).map((raw, offset) => ({
-    index: offset + 1,
+export function parseReference(value: string, index = 1): Reference {
+  const raw = cleanReference(value);
+  return {
+    index,
     raw,
     doi: extractDoi(raw),
     years: extractYears(raw),
     visibleSurnames: extractVisibleSurnames(raw),
     hasEtAl: ET_AL_RE.test(raw),
-  }));
+  };
+}
+
+export function parseReferences(text: string): Reference[] {
+  return splitReferences(text).map((raw, offset) => parseReference(raw, offset + 1));
 }
 
 export function joinReferenceLines(lines: Iterable<string>): string {

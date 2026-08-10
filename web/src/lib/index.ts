@@ -1,6 +1,7 @@
 export { aggregateResolutions, rankPeople } from "./aggregation";
 export {
   analyzeBibliography,
+  analyzeReferences,
   DEFAULT_ANALYZE_OPTIONS,
   MetadataError,
 } from "./analysis";
@@ -33,8 +34,17 @@ export {
   extractVisibleSurnames,
   extractYears,
   joinReferenceLines,
+  parseReference,
   parseReferences,
   splitReferences,
 } from "./parsing";
+export {
+  extractDoiFromPaperLink,
+  isPaperBibliographyOverLimit,
+  loadPaperBibliography,
+  PaperLinkError,
+  parseCrossrefReference,
+} from "./paper";
+export type { PaperBibliography, PaperLinkErrorCode } from "./paper";
 export { resultAsObject, resultToCsv, resultToJson } from "./serialization";
 export type * from "./types";

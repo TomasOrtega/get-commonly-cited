@@ -1,10 +1,17 @@
 export {
   analyzeBibliography,
+  analyzeReferences,
   DEFAULT_ANALYZE_OPTIONS,
   MetadataError,
 } from "./analysis";
 export { clearBrowserCache, clearCrossrefCache } from "./cache";
-export { parseReferences } from "./parsing";
+export {
+  extractDoiFromPaperLink,
+  isPaperBibliographyOverLimit,
+  loadPaperBibliography,
+  PaperLinkError,
+} from "./paper";
+export { parseReference, parseReferences } from "./parsing";
 export { resultAsObject, resultToCsv, resultToJson } from "./serialization";
 export type {
   AnalysisProgress,
@@ -21,3 +28,4 @@ export type {
   ResolutionStatus,
   Work,
 } from "./types";
+export type { PaperBibliography, PaperLinkErrorCode } from "./paper";

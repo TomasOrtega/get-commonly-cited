@@ -112,9 +112,16 @@ export async function analyzeBibliography(
   suppliedOptions: Partial<AnalyzeOptions> = {},
   progress?: ProgressCallback,
 ): Promise<AnalysisResult> {
+  return analyzeReferences(parseReferences(text), suppliedOptions, progress);
+}
+
+export async function analyzeReferences(
+  references: readonly Reference[],
+  suppliedOptions: Partial<AnalyzeOptions> = {},
+  progress?: ProgressCallback,
+): Promise<AnalysisResult> {
   const options: AnalyzeOptions = { ...DEFAULT_ANALYZE_OPTIONS, ...suppliedOptions };
   options.signal?.throwIfAborted();
-  const references = parseReferences(text);
   const crossref = new CrossrefClient({
     mailto: options.mailto,
     fetchImpl: options.fetchImpl,

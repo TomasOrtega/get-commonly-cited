@@ -236,6 +236,11 @@ export class CrossrefClient {
   }
 
   async lookupDoi(doi: string): Promise<Work | null> {
+    const item = await this.lookupDoiRecord(doi);
+    return item ? parseCrossrefWork(item) : null;
+  }
+
+  async lookupDoiRecord(doi: string): Promise<Record<string, unknown> | null> {
     const normalized = normalizeDoi(doi);
     if (!normalized) return null;
     let payload: Record<string, unknown>;
@@ -252,7 +257,7 @@ export class CrossrefClient {
     if (!isRecord(payload.message)) {
       throw new InvalidMetadataResponse("Crossref DOI response did not contain a work object");
     }
-    return parseCrossrefWork(payload.message);
+    return payload.message;
   }
 
   async search(reference: Reference, limit: number): Promise<Work[]> {

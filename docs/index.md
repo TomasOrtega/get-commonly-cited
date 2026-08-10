@@ -1,13 +1,14 @@
 # commonly-cited
 
-`commonly-cited` identifies the people who appear most often across a pasted
-bibliography, including coauthors hidden behind “et al.”.
+`commonly-cited` identifies the people who appear most often across a paper's
+references or a pasted bibliography, including coauthors hidden behind “et al.”.
 
 **[Open the web app](https://commonly-cited.tomasortega.net/)**
 
-The keyless web app runs locally in your browser and resolves references with
-Crossref. The Python package adds command-line automation and optional OpenAlex
-author-identity enrichment.
+The keyless web app accepts DOI-bearing paper links and reference lists, runs
+locally in your browser, and resolves references with Crossref. The Python
+package adds command-line automation and optional OpenAlex author-identity
+enrichment.
 
 The tool combines four concerns that are usually handled separately:
 
