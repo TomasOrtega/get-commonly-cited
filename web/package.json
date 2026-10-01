@@ -14,13 +14,13 @@
     "@fontsource-variable/dm-sans": "^5.2.6",
     "@fontsource-variable/newsreader": "^5.2.8",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.4.0",
     "@types/react": "^19.1.10",
-    "@types/react-dom": "^19.2.5",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^10.8.0",
     "eslint-plugin-react-hooks": "^7.1.1",
