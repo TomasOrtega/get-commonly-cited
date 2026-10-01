@@ -12,8 +12,8 @@ describe("App", () => {
     expect(markup).toContain('name="source-mode" value="paper"');
     expect(markup).toContain('name="source-mode" checked="" value="references"');
     expect(markup).toContain("Paste a reference list");
-    expect(markup).toContain('<form class="workspace"');
-    expect(markup).toContain('class="primary-button" type="submit"');
+    expect(markup).toContain('<form id="analysis-workspace"');
+    expect(markup).toContain('type="submit" disabled=""');
   });
 
   it("renders line breaks in the bibliography placeholder", () => {
@@ -25,13 +25,15 @@ describe("App", () => {
     expect(markup).not.toContain("\\\\n");
   });
 
-  it("uses the section label pattern for privacy", () => {
+  it("links to privacy and limits from the main navigation", () => {
     const markup = renderToStaticMarkup(createElement(App));
+    const navigation = markup.match(/<nav aria-label="Main navigation">([\s\S]*?)<\/nav>/)?.[1];
 
-    expect(markup).toContain(
-      '<p class="eyebrow"><span>03</span> Privacy &amp; limits</p>',
+    expect(navigation).toContain(
+      '<a href="./docs/privacy/">Privacy &amp; limits</a>',
     );
-    expect(markup).not.toContain('class="privacy-index"');
+    expect(markup).not.toContain('id="privacy-title"');
+    expect(markup).toContain("Clear local cache");
   });
 
   it("links to the developer's GitHub Sponsors page", () => {

@@ -12,6 +12,17 @@ and this project follows
 
 - analyze a paper's deposited bibliography from a DOI-bearing link in the web
   app
+- a favicon and inline help for full and fractional counting
+
+### Changed
+
+- simplify the web app to a single-column layout with native controls and system
+  fonts
+- move privacy and limits to the main navigation and shorten the README
+
+### Fixed
+
+- serve documentation in local development and production previews
 
 ## [0.2.0] - 2026-08-07
 

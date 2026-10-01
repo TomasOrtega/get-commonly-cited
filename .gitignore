@@ -28,6 +28,7 @@ venv/
 # Documentation
 site/
 docs/_build/
+web/public/docs/
 
 # Editors and operating systems
 .DS_Store

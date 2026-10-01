@@ -1,4 +1,4 @@
-# Privacy and external services
+# Privacy & limits
 
 ## Web app
 
@@ -9,9 +9,19 @@ server. Rankings stay in the browser. Successful Crossref responses and their
 citation queries are cached for seven days in the browser's local site data.
 Crossref and GitHub apply their own privacy policies to requests they receive.
 
-Clear cached responses from the app or with the browser's site-data controls. Do
-not submit confidential references unless sending their citation text to
-Crossref is acceptable.
+Use **Clear local cache** in the app's footer, or the browser's site-data
+controls, to remove cached responses. Do not submit confidential references
+unless sending their citation text to Crossref is acceptable.
+
+### Limits
+
+The browser accepts up to 100 references per analysis and TXT, BibTeX, or RIS
+files up to 1 MB. Paper links must contain a DOI, and the publisher must have
+deposited the paper's references with Crossref.
+
+Rankings depend on the metadata publishers deposit. Uncertain matches remain
+unresolved and are excluded from the ranking. Review the audit before using the
+results in your research.
 
 ## Python package
 

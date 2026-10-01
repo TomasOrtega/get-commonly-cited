@@ -266,332 +266,201 @@ function App() {
     }
   }
 
-  const progressPercent = progress && progress.current !== null && progress.total
-    ? Math.min(100, Math.round((progress.current / progress.total) * 100))
-    : 0;
-
   return (
     <>
-      <a className="skip-link" href="#analysis-workspace">
-        Skip to analyzer
-      </a>
-      <header className="site-header">
-        <a className="brand" href="./" aria-label="Commonly Cited home">
-          <span className="brand-mark" aria-hidden="true">
-            <span>C</span><span>C</span>
-          </span>
-          <span className="brand-copy">
-            <strong>Commonly Cited</strong>
-            <small>Bibliography analyzer</small>
-          </span>
-        </a>
+      <a className="skip-link" href="#analysis-workspace">Skip to analyzer</a>
+      <header>
+        <a href="./"><strong>Commonly Cited</strong></a>
         <nav aria-label="Main navigation">
-          <a href={DOCS_URL}>Documentation <span aria-hidden="true">↗</span></a>
-          <a href={GITHUB_URL}>GitHub <span aria-hidden="true">↗</span></a>
+          <a href={DOCS_URL}>Documentation</a>
+          <a href="./docs/privacy/">Privacy &amp; limits</a>
+          <a href={GITHUB_URL}>GitHub</a>
         </nav>
       </header>
 
       <main>
-        <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-copy">
-            <p className="eyebrow"><span>01</span> Open research utility</p>
-            <h1 id="hero-title">Who keeps showing up in your bibliography?</h1>
-            <p className="lede">
-              Start with a paper link or reference list, then rank the people behind
-              the cited works—including coauthors tucked away behind <em>et al.</em>
-            </p>
-            <div className="method-note">
-              <span className="method-rule" aria-hidden="true" />
-              <p>
-                Matching is intentionally conservative. Uncertain citations stay unresolved
-                and visible in the audit instead of being quietly misattributed.
+        <h1>Who keeps showing up in your bibliography?</h1>
+        <p>
+          Rank the people behind your cited works, including coauthors hidden
+          behind <em>et al.</em> No account or API key required.
+        </p>
+
+        <form
+          id="analysis-workspace"
+          tabIndex={-1}
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            void runAnalysis();
+          }}
+        >
+          <fieldset>
+            <legend>Start with</legend>
+            <label>
+              <input type="radio" name="source-mode" value="references"
+                checked={sourceMode === "references"}
+                onChange={() => changeSourceMode("references")} disabled={isAnalyzing} />
+              Reference list
+            </label>
+            <label>
+              <input type="radio" name="source-mode" value="paper"
+                checked={sourceMode === "paper"}
+                onChange={() => changeSourceMode("paper")} disabled={isAnalyzing} />
+              Paper link
+            </label>
+          </fieldset>
+
+          <h2>{sourceMode === "paper" ? "Link to a paper" : "Paste a reference list"}</h2>
+          {sourceMode === "paper" ? (
+            <>
+              <label htmlFor="paper-link">Paper link</label>
+              <input
+                id="paper-link"
+                type="url"
+                inputMode="url"
+                autoComplete="url"
+                value={paperLink}
+                onChange={(event) => {
+                  setPaperLink(event.target.value);
+                  setPaperBibliography(null);
+                  setResult(null);
+                  setError(null);
+                  setPaperLinkInvalid(false);
+                }}
+                placeholder="https://doi.org/10.1000/example"
+                disabled={isAnalyzing}
+                aria-describedby="paper-link-guidance"
+                aria-invalid={paperLinkInvalid}
+                aria-errormessage={paperLinkInvalid ? "analysis-error" : undefined}
+              />
+              <p id="paper-link-guidance">
+                Use a doi.org link or a publisher URL containing the DOI.
+                References must be deposited with Crossref; {MAX_REFERENCES} usable references max.
               </p>
-            </div>
-          </div>
-
-          <form
-            className="workspace"
-            id="analysis-workspace"
-            tabIndex={-1}
-            noValidate
-            onSubmit={(event) => {
-              event.preventDefault();
-              void runAnalysis();
-            }}
-          >
-            <div className="workspace-heading">
-              <div>
-                <p className="step-label">Your source material</p>
-                <h2>{sourceMode === "paper" ? "Link to a paper" : "Paste a reference list"}</h2>
-              </div>
-              {sourceMode === "references" && (
-                <button className="text-button" type="button" onClick={loadExample} disabled={isAnalyzing}>
-                  Use an example
-                </button>
-              )}
-            </div>
-
-            <fieldset className="source-selector">
-              <legend>Start with</legend>
-              <div className="segmented-control">
-                <label>
-                  <input
-                    type="radio"
-                    name="source-mode"
-                    value="paper"
-                    checked={sourceMode === "paper"}
-                    onChange={() => changeSourceMode("paper")}
-                    disabled={isAnalyzing}
-                  />
-                  <span>Paper link</span>
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="source-mode"
-                    value="references"
-                    checked={sourceMode === "references"}
-                    onChange={() => changeSourceMode("references")}
-                    disabled={isAnalyzing}
-                  />
-                  <span>Reference list</span>
-                </label>
-              </div>
-            </fieldset>
-
-            {sourceMode === "paper" ? (
-              <div className="paper-link-panel">
-                <label htmlFor="paper-link">Paper link</label>
-                <input
-                  id="paper-link"
-                  type="url"
-                  inputMode="url"
-                  autoComplete="url"
-                  value={paperLink}
-                  onChange={(event) => {
-                    setPaperLink(event.target.value);
-                    setPaperBibliography(null);
-                    setResult(null);
-                    setError(null);
-                    setPaperLinkInvalid(false);
-                  }}
-                  placeholder="https://doi.org/10.1000/example"
-                  disabled={isAnalyzing}
-                  aria-describedby="paper-link-guidance"
-                  aria-invalid={paperLinkInvalid}
-                  aria-errormessage={paperLinkInvalid ? "analysis-error" : undefined}
-                />
-                <p id="paper-link-guidance">
-                  Use a doi.org link or a publisher URL containing the DOI. References
-                  must be deposited with Crossref; 100 usable references max.
+              {paperBibliography && (
+                <p role="status">
+                  <strong>{paperBibliography.title}</strong><br />
+                  {paperReferenceCount} usable references loaded.
+                  {paperBibliography.skippedReferences > 0 &&
+                    " " + paperBibliography.skippedReferences + " incomplete records skipped."}
                 </p>
-                {paperBibliography && (
-                  <p className="paper-source-note" role="status">
-                    <strong>{paperBibliography.title}</strong>
-                    <span>
-                      {paperBibliography.references.length} usable {paperBibliography.references.length === 1 ? "reference" : "references"} loaded
-                      {paperBibliography.skippedReferences > 0
-                        ? ` · ${paperBibliography.skippedReferences} incomplete ${paperBibliography.skippedReferences === 1 ? "record" : "records"} skipped`
-                        : ""}
-                    </span>
-                  </p>
-                )}
-              </div>
-            ) : (
-              <>
-                <label className="sr-only" htmlFor="bibliography-input">Bibliography text</label>
-                <textarea
-                  id="bibliography-input"
-                  value={input}
-                  onChange={(event) => {
-                    setInput(event.target.value);
-                    setFilename(null);
-                    setResult(null);
-                    setError(null);
-                  }}
-                  placeholder={"Paste references here…\n\nNumbered lists, BibTeX, RIS, DOIs, and wrapped citations are welcome."}
-                  spellCheck={false}
-                  disabled={isAnalyzing}
-                  aria-describedby="input-guidance input-count"
-                  aria-invalid={isOverLimit}
-                />
-
-                <div className="input-meta">
-                  <div className="file-control">
-                    <input
-                      ref={fileInputRef}
-                      id="bibliography-file"
-                      type="file"
-                      accept=".txt,.bib,.ris,text/plain,application/x-bibtex,application/x-research-info-systems"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (file) {
-                          void handleFile(file);
-                          event.currentTarget.value = "";
-                        }
-                      }}
-                      disabled={isAnalyzing}
-                    />
-                    <label htmlFor="bibliography-file">
-                      <span aria-hidden="true">+</span> {filename ?? "Choose a file"}
-                    </label>
-                    <span id="input-guidance">TXT, BIB, or RIS · 1 MB max</span>
-                  </div>
-                  <p id="input-count" className={isOverLimit ? "count count-error" : "count"}>
-                    <strong>{referenceCount}</strong> parsed {referenceCount === 1 ? "reference" : "references"}
-                    <span aria-hidden="true"> / </span>{MAX_REFERENCES} max
-                  </p>
-                </div>
-              </>
-            )}
-
-            <div className="controls">
-              <fieldset>
-                <legend>Ranking method</legend>
-                <div className="segmented-control">
-                  <label>
-                    <input
-                      type="radio"
-                      name="ranking"
-                      value="full"
-                      checked={ranking === "full"}
-                      onChange={() => setRanking("full")}
-                      disabled={isAnalyzing}
-                    />
-                    <span>Full count</span>
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="ranking"
-                      value="fractional"
-                      checked={ranking === "fractional"}
-                      onChange={() => setRanking("fractional")}
-                      disabled={isAnalyzing}
-                    />
-                    <span>Fractional</span>
-                  </label>
-                </div>
-              </fieldset>
-
-              <label className="toggle-control">
+              )}
+            </>
+          ) : (
+            <>
+              <label htmlFor="bibliography-input">Bibliography text</label>
+              <textarea
+                id="bibliography-input"
+                rows={8}
+                value={input}
+                onChange={(event) => {
+                  setInput(event.target.value);
+                  setFilename(null);
+                  setResult(null);
+                  setError(null);
+                }}
+                placeholder={"Paste references here…\n\nNumbered lists, BibTeX, RIS, DOIs, and wrapped citations are welcome."}
+                spellCheck={false}
+                disabled={isAnalyzing}
+                aria-describedby="input-guidance input-count"
+                aria-invalid={isOverLimit}
+              />
+              <div className="actions">
+                <button type="button" onClick={loadExample} disabled={isAnalyzing}>Use an example</button>
+                <label htmlFor="bibliography-file">Or upload a file:</label>
                 <input
-                  type="checkbox"
-                  checked={includeCollective}
-                  onChange={(event) => setIncludeCollective(event.target.checked)}
+                  ref={fileInputRef}
+                  id="bibliography-file"
+                  type="file"
+                  accept=".txt,.bib,.ris,text/plain,application/x-bibtex,application/x-research-info-systems"
+                  aria-describedby="input-guidance"
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) {
+                      void handleFile(file);
+                      event.currentTarget.value = "";
+                    }
+                  }}
                   disabled={isAnalyzing}
                 />
-                <span className="toggle" aria-hidden="true"><span /></span>
-                <span>
-                  Include collectives
-                  <small>Consortia, committees, and study groups</small>
-                </span>
-              </label>
+              </div>
+              <p id="input-guidance">TXT, BIB, or RIS · 1 MB max{filename && " · Loaded: " + filename}</p>
+              <p id="input-count" className={isOverLimit ? "error" : undefined}>
+                {referenceCount} parsed {referenceCount === 1 ? "reference" : "references"} / {MAX_REFERENCES} max
+              </p>
+            </>
+          )}
+
+          <fieldset>
+            <legend>Ranking method</legend>
+            <label>
+              <input type="radio" name="ranking" value="full" checked={ranking === "full"}
+                onChange={() => setRanking("full")} disabled={isAnalyzing} />
+              Full count
+            </label>
+            <label>
+              <input type="radio" name="ranking" value="fractional" checked={ranking === "fractional"}
+                onChange={() => setRanking("fractional")} disabled={isAnalyzing} />
+              Fractional
+            </label>
+            <details className="ranking-help">
+              <summary>How are these counted?</summary>
+              <p><strong>Full count:</strong> Each author gets 1 for each distinct matched work.</p>
+              <p>
+                <strong>Fractional:</strong> Each work contributes 1 in total, split equally
+                among its counted authors. A work with four counted authors gives each 0.25.
+                Collectives share that credit when included.
+              </p>
+              <p>Choose full count for frequency; fractional gives less weight to large author lists.</p>
+            </details>
+          </fieldset>
+          <label>
+            <input type="checkbox" checked={includeCollective}
+              onChange={(event) => setIncludeCollective(event.target.checked)} disabled={isAnalyzing} />
+            Include collectives (consortia, committees, and study groups)
+          </label>
+
+          {error && <p id="analysis-error" className="error" role="alert">{error}</p>}
+          {isAnalyzing && progress ? (
+            <div aria-live="polite" aria-atomic="true">
+              <p>
+                {progress.label}
+                {progress.current !== null && progress.total !== null &&
+                  " · " + progress.current + " of " + progress.total}
+              </p>
+              <progress aria-label={progress.label}
+                value={progress.current ?? undefined} max={progress.total ?? undefined} />
+              <p>{progress.reference.raw}</p>
+              <button ref={stopButtonRef} type="button" onClick={() => abortControllerRef.current?.abort()}>
+                Stop analysis
+              </button>
             </div>
-
-            {error && <div id="analysis-error" className="error-message" role="alert"><span aria-hidden="true">!</span>{error}</div>}
-
-            {isAnalyzing && progress ? (
-              <div className="progress-panel" aria-live="polite" aria-atomic="true">
-                <div className="progress-copy">
-                  <span>{progress.label}</span>
-                  {progress.current !== null && progress.total !== null && (
-                    <strong>{progress.current} of {progress.total}</strong>
-                  )}
-                </div>
-                <div
-                  className="progress-track"
-                  role="progressbar"
-                  aria-label={progress.label}
-                  aria-valuemin={progress.total === null ? undefined : 0}
-                  aria-valuemax={progress.total ?? undefined}
-                  aria-valuenow={progress.current ?? undefined}
-                >
-                  <span
-                    className={progress.total === null ? "progress-indeterminate" : undefined}
-                    style={progress.total === null ? undefined : { width: `${progressPercent}%` }}
-                  />
-                </div>
-                <p>{progress.reference.raw}</p>
-                <button ref={stopButtonRef} className="stop-button" type="button" onClick={() => abortControllerRef.current?.abort()}>
-                  Stop analysis
-                </button>
-              </div>
-            ) : (
-              <div className="analyze-row">
-                <button
-                  className="primary-button"
-                  type="submit"
-                  disabled={!hasSourceInput || isOverLimit}
-                >
-                  {sourceMode === "paper" ? "Analyze paper" : "Analyze bibliography"} <span aria-hidden="true">→</span>
-                </button>
-                <p>No account or API key required.</p>
-              </div>
-            )}
-          </form>
-        </section>
-
-        <section className="how-it-works" aria-labelledby="method-title">
-          <div>
-            <p className="eyebrow"><span>02</span> Method</p>
-            <h2 id="method-title">From citation strings to recurring names.</h2>
-          </div>
-          <ol>
-            <li><span>1</span><p><strong>Collect</strong> references from your list or a paper’s Crossref record.</p></li>
-            <li><span>2</span><p><strong>Resolve</strong> works against open Crossref metadata.</p></li>
-            <li><span>3</span><p><strong>Count</strong> each person once per matched work.</p></li>
-          </ol>
-        </section>
+          ) : (
+            <p>
+              <button type="submit" disabled={!hasSourceInput || isOverLimit}>
+                {sourceMode === "paper" ? "Analyze paper" : "Analyze bibliography"}
+              </button>
+            </p>
+          )}
+        </form>
 
         {displayedResult && (
-          <Results
-            result={displayedResult}
-            ranking={ranking}
-            unresolved={unresolved}
-            headingRef={resultsHeadingRef}
-            onReset={reset}
-          />
+          <Results result={displayedResult} ranking={ranking} unresolved={unresolved}
+            headingRef={resultsHeadingRef} onReset={reset} />
         )}
-
-        <section className="privacy-note" aria-labelledby="privacy-title">
-          <div>
-            <p className="eyebrow"><span>03</span> Privacy &amp; limits</p>
-            <h2 id="privacy-title">Runs here. Resolves there.</h2>
-          </div>
-          <div className="privacy-copy">
-            <p>
-              Your link or list is processed in this browser. A paper DOI and individual citations
-              are sent directly to Crossref for bibliography retrieval and metadata matching.
-              Responses and citation queries are cached on this device for seven days; this site
-              has no server and stores no result rankings.
-            </p>
-            <p>
-              Crossref quality depends on publisher deposits. Review unresolved and ambiguous
-              records before using the ranking in your research.
-            </p>
-            <a href="./docs/privacy/">Read the privacy notes <span aria-hidden="true">→</span></a>
-            <button
-              className="cache-button"
-              type="button"
-              onClick={() => {
-                clearCrossrefCache();
-                setCacheNotice("Local metadata cache cleared.");
-              }}
-            >
-              Clear local cache
-            </button>
-            <span className="cache-notice" role="status" aria-live="polite">{cacheNotice}</span>
-          </div>
-        </section>
       </main>
 
       <footer>
-        <p>Commonly Cited <span>·</span> An open-source research utility</p>
+        <span>Commonly Cited · An open-source research utility</span>
         <nav aria-label="Footer navigation">
-          <a href={SPONSORS_URL}>Sponsor the developer <span aria-hidden="true">↗</span></a>
-          <a href={GITHUB_URL}>BSD-3-Clause <span aria-hidden="true">↗</span></a>
+          <a href={SPONSORS_URL}>Sponsor the developer</a>
+          <a href={GITHUB_URL}>BSD-3-Clause</a>
+          <button type="button" onClick={() => {
+            clearCrossrefCache();
+            setCacheNotice("Local metadata cache cleared.");
+          }}>Clear local cache</button>
         </nav>
+        <span role="status">{cacheNotice}</span>
       </footer>
     </>
   );
@@ -609,157 +478,102 @@ function Results({ result, ranking, unresolved, headingRef, onReset }: ResultsPr
   const { summary } = result;
 
   return (
-    <section className="results" aria-labelledby="results-title">
-      <div className="results-header">
-        <div>
-          <p className="eyebrow"><span>Results</span> Analysis complete</p>
-          <h2 id="results-title" ref={headingRef} tabIndex={-1}>The recurring voices</h2>
-        </div>
-        <div className="result-actions" role="group" aria-label="Download results">
-          <button type="button" onClick={() => downloadCsv(result)}>CSV <span aria-hidden="true">↓</span></button>
-          <button type="button" onClick={() => downloadJson(result)}>JSON audit <span aria-hidden="true">↓</span></button>
-          <button type="button" onClick={onReset}>Start over <span aria-hidden="true">↺</span></button>
-        </div>
+    <section aria-labelledby="results-title">
+      <h2 id="results-title" ref={headingRef} tabIndex={-1}>Results</h2>
+      <div className="actions" role="group" aria-label="Result actions">
+        <button type="button" onClick={() => downloadCsv(result)}>Download CSV</button>
+        <button type="button" onClick={() => downloadJson(result)}>Download JSON audit</button>
+        <button type="button" onClick={onReset}>Start over</button>
       </div>
-
-      <div className="summary-grid" role="group" aria-label="Analysis summary">
-        <div><strong>{summary.inputReferences}</strong><span>References parsed</span></div>
-        <div><strong>{summary.distinctMatchedWorks}</strong><span>Distinct works</span></div>
-        <div><strong>{summary.rankedPeople}</strong><span>People identified</span></div>
-        <div><strong>{summary.hiddenAuthorsExpanded}</strong><span>Hidden authors recovered</span></div>
-      </div>
-
+      <p>
+        {summary.inputReferences} references parsed · {summary.distinctMatchedWorks} distinct works ·{" "}
+        {summary.rankedPeople} people identified · {summary.hiddenAuthorsExpanded} hidden authors recovered
+      </p>
       {result.warnings.length > 0 && (
-        <div className="warning-list" role="status">
-          {result.warnings.map((warning) => <p key={warning}><span aria-hidden="true">!</span>{warning}</p>)}
+        <div role="status">
+          {result.warnings.map((warning) => <p key={warning}>{warning}</p>)}
         </div>
       )}
 
-      <div className="ranking-panel">
-        <div className="panel-heading">
-          <div>
-            <p className="step-label">People ranking</p>
-            <h3>{ranking === "full" ? "Cited works" : "Fractional authorship"}</h3>
-          </div>
-          <p>
-            {ranking === "full"
-              ? "One count per person, per distinct work"
-              : "One work divided evenly across its authors"}
-          </p>
-        </div>
-
-        {result.people.length ? (
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Rank</th>
-                  <th scope="col">Person</th>
-                  <th scope="col">Cited works</th>
-                  <th scope="col">Fractional</th>
-                  <th scope="col">Share</th>
-                  <th scope="col">Identifier</th>
+      <h3>{ranking === "full" ? "Cited works" : "Fractional authorship"}</h3>
+      <p>
+        {ranking === "full"
+          ? "One count per person, per distinct work."
+          : "One work divided evenly across its authors."}
+      </p>
+      {result.people.length ? (
+        <div className="table-scroll" role="region" aria-label="People ranking" tabIndex={0}>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Person</th>
+                <th scope="col">Cited works</th>
+                <th scope="col">Fractional</th>
+                <th scope="col">Share</th>
+                <th scope="col">Identifier</th>
+              </tr>
+            </thead>
+            <tbody>
+              {result.people.map((person, index) => (
+                <tr key={person.key}>
+                  <td>{index + 1}</td>
+                  <th scope="row">
+                    {person.displayName}
+                    {person.aliases.size > 1 && (
+                      <small> ({person.aliases.size - 1} {person.aliases.size === 2 ? "alias" : "aliases"})</small>
+                    )}
+                  </th>
+                  <td>{person.fullCount}</td>
+                  <td>{person.fractionalCount.toFixed(3)}</td>
+                  <td>{(summary.distinctMatchedWorks
+                    ? person.fullCount / summary.distinctMatchedWorks * 100 : 0).toFixed(1)}%</td>
+                  <td>
+                    {person.orcid ? (
+                      <a href={"https://orcid.org/" + person.orcid}>ORCID</a>
+                    ) : person.openalexId ? (
+                      <a href={person.openalexId.startsWith("http")
+                        ? person.openalexId : "https://openalex.org/" + person.openalexId}>OpenAlex</a>
+                    ) : "Name only"}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {result.people.map((person, index) => {
-                  const share = summary.distinctMatchedWorks
-                    ? person.fullCount / summary.distinctMatchedWorks
-                    : 0;
-                  return (
-                    <tr key={person.key}>
-                      <td><span className="rank-number">{String(index + 1).padStart(2, "0")}</span></td>
-                      <th scope="row">
-                        <span>{person.displayName}</span>
-                        {person.aliases.size > 1 && <small>{person.aliases.size - 1} {person.aliases.size === 2 ? "alias" : "aliases"}</small>}
-                      </th>
-                      <td className={ranking === "full" ? "active-metric" : undefined}>{person.fullCount}</td>
-                      <td className={ranking === "fractional" ? "active-metric" : undefined}>{person.fractionalCount.toFixed(3)}</td>
-                      <td>{(share * 100).toFixed(1)}%</td>
-                      <td>
-                        {person.orcid ? (
-                          <a href={`https://orcid.org/${person.orcid}`}>ORCID <span aria-hidden="true">↗</span></a>
-                        ) : person.openalexId ? (
-                          <a href={person.openalexId.startsWith("http") ? person.openalexId : `https://openalex.org/${person.openalexId}`}>OpenAlex <span aria-hidden="true">↗</span></a>
-                        ) : <span className="muted">Name only</span>}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="empty-ranking">
-            <p>No people could be ranked from the matched records.</p>
-          </div>
-        )}
-      </div>
-
-      <div className="audit-panel">
-        <div className="panel-heading">
-          <div>
-            <p className="step-label">Resolution audit</p>
-            <h3>{unresolved.length} {unresolved.length === 1 ? "record needs" : "records need"} review</h3>
-          </div>
-          <div className="audit-totals" role="group" aria-label="Resolution counts">
-            <span><i className="dot dot-matched" aria-hidden="true" />{summary.matchedReferences} matched</span>
-            <span><i className="dot dot-ambiguous" aria-hidden="true" />{summary.ambiguousReferences} ambiguous</span>
-            <span><i className="dot dot-unmatched" aria-hidden="true" />{summary.unmatchedReferences + summary.erroredReferences} unresolved</span>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
+      ) : <p>No people could be ranked from the matched records.</p>}
 
-        {unresolved.length ? (
-          <div className="audit-list">
-            {unresolved.map((resolution) => (
-              <details key={resolution.reference.index}>
-                <summary>
-                  <span className={`status status-${resolution.status}`}>{formatStatus(resolution.status)}</span>
-                  <span className="reference-preview">
-                    <strong>Reference {resolution.reference.index}</strong>
-                    <span>{resolution.reference.raw}</span>
-                  </span>
-                  <span className="disclosure" aria-hidden="true">+</span>
-                </summary>
-                <div className="audit-detail">
-                  <div>
-                    <span>Reason</span>
-                    <p>{resolution.reason ?? "No accepted metadata match was found."}</p>
-                  </div>
-                  <div>
-                    <span>Confidence</span>
-                    <p>{Math.round(resolution.confidence * 100)}%</p>
-                  </div>
-                  {resolution.alternatives.length > 0 && (
-                    <div className="alternatives">
-                      <span>Closest candidates</span>
-                      <ol>
-                        {resolution.alternatives.map((candidate) => (
-                          <li key={candidate.work.id}>
-                            <span>{candidate.work.title}</span>
-                            <strong>{Math.round(candidate.score * 100)}%</strong>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  )}
-                  {resolution.providerErrors.length > 0 && (
-                    <div className="alternatives">
-                      <span>Provider notes</span>
-                      {resolution.providerErrors.map((providerError) => <p key={providerError}>{providerError}</p>)}
-                    </div>
-                  )}
-                </div>
-              </details>
-            ))}
-          </div>
-        ) : (
-          <div className="audit-clear">
-            <span aria-hidden="true">✓</span>
-            <p><strong>Nothing needs review.</strong> Every parsed reference received a confident match.</p>
-          </div>
-        )}
-      </div>
+      <h3>Resolution audit</h3>
+      <p>
+        {summary.matchedReferences} matched · {summary.ambiguousReferences} ambiguous ·{" "}
+        {summary.unmatchedReferences + summary.erroredReferences} unresolved
+      </p>
+      {unresolved.length ? unresolved.map((resolution) => (
+        <details key={resolution.reference.index}>
+          <summary>{formatStatus(resolution.status)} · Reference {resolution.reference.index}</summary>
+          <p>{resolution.reference.raw}</p>
+          <p><strong>Reason:</strong> {resolution.reason ?? "No accepted metadata match was found."}</p>
+          <p><strong>Confidence:</strong> {Math.round(resolution.confidence * 100)}%</p>
+          {resolution.alternatives.length > 0 && (
+            <>
+              <h4>Closest candidates</h4>
+              <ol>
+                {resolution.alternatives.map((candidate) => (
+                  <li key={candidate.work.id}>
+                    {candidate.work.title} · {Math.round(candidate.score * 100)}%
+                  </li>
+                ))}
+              </ol>
+            </>
+          )}
+          {resolution.providerErrors.length > 0 && (
+            <>
+              <h4>Provider notes</h4>
+              {resolution.providerErrors.map((providerError) => <p key={providerError}>{providerError}</p>)}
+            </>
+          )}
+        </details>
+      )) : <p>Nothing needs review. Every parsed reference received a confident match.</p>}
     </section>
   );
 }

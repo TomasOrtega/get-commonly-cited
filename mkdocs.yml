@@ -20,7 +20,7 @@ nav:
   - Usage: usage.md
   - How matching works: algorithm.md
   - Python API: reference.md
-  - Privacy: privacy.md
+  - Privacy & limits: privacy.md
 
 plugins:
   - search
