@@ -9,6 +9,13 @@ updates:
     directory: /web
     schedule:
       interval: monthly
+    groups:
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
     # Keep TypeScript within typescript-eslint's supported peer range.
     ignore:
       - dependency-name: typescript
